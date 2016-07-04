@@ -161,7 +161,7 @@ function detectFirefox() {
         currentBrowser = RTCBrowserType.RTC_BROWSER_FIREFOX;
         var version = parseInt(
             navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-        logger.log('This appears to be Firefox, ver: ' + version);
+        logger.log('This appears to be Firefox, version: ' + version);
         return version;
     }
     return null;
