@@ -70,6 +70,8 @@ function JitsiTrack(rtc, stream, track, streamInactiveHandler, trackMediaType,
     this.type = trackMediaType;
     this.track = track;
     this.videoType = videoType;
+    
+    logger.log("created JitsiTrack with a " + trackMediaType.toString() + " stream");
 
     if(stream) {
         if (RTCBrowserType.isFirefox()) {
