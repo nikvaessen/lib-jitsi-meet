@@ -272,6 +272,7 @@ XMPP.prototype.sendLogs = function (data) {
     var deflate = true;
 
     var content = JSON.stringify(data);
+    console.log(content);
     if (deflate) {
         content = String.fromCharCode.apply(null, Pako.deflateRaw(content));
     }
