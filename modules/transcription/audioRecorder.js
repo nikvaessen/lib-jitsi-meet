@@ -19,6 +19,10 @@ var TrackRecorder = function(track){
     // The array of data chunks recorded from the stream
     // acts as a buffer until the data is stored on disk
     this.data = null;
+    // Will get the name belonging to the audio stream being recorder
+    this.getName = function() {
+        return this.track.getParticipant();
+    };
 };
 
 /**

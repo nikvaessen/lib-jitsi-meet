@@ -21,6 +21,7 @@ var Resolutions = require("./service/RTC/Resolutions");
 var ScriptUtil = require("./modules/util/ScriptUtil");
 var GlobalOnErrorHandler = require("./modules/util/GlobalOnErrorHandler");
 var RTCBrowserType = require("./modules/RTC/RTCBrowserType");
+var audioRecorder = require("./modules/transcription/audioRecorder");
 
 // The amount of time to wait until firing
 // JitsiMediaDevicesEvents.PERMISSION_PROMPT_IS_SHOWN event
@@ -67,6 +68,7 @@ var LibJitsiMeet = {
     },
     logLevels: Logger.levels,
     mediaDevices: JitsiMediaDevices,
+    recorder: audioRecorder,
     analytics: AnalyticsAdapter,
     init: function (options) {
         var logObject, attr;
