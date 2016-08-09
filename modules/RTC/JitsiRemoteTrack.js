@@ -64,6 +64,14 @@ JitsiRemoteTrack.prototype.getParticipantId = function() {
 };
 
 /**
+ * Returns the participant name which owns the track.
+ * @returns {string} the name of the participants.
+ */
+JitsiRemoteTrack.prototype.getParticipant = function() {
+    return Strophe.getResourceFromJid(this.peerjid).getDisplayName();
+};
+
+/**
  * Return false;
  */
 JitsiRemoteTrack.prototype.isLocal = function () {
