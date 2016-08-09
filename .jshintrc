@@ -16,4 +16,5 @@
     "maxlen": 80, // {int} Max number of characters per line
     "latedef": false, //This option prohibits the use of a variable before it was defined
     "laxbreak": true //Ignore line breaks around "=", "==", "&&", etc.
+    "esversion":6
 }
