@@ -190,7 +190,6 @@ audioRecorder.prototype.updateNames = function(){
         else {
             var id = trackRecorder.track.getParticipantId();
             var participant = conference.getParticipantById(id);
-            //non-good method via APP
             var newName = participant.getDisplayName();
             if(newName !== 'undefined') {
                 trackRecorder.name = newName;
