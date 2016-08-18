@@ -59,7 +59,7 @@ function JitsiConference(options) {
     };
     this.isMutedByFocus = false;
     this.reportedAudioSSRCs = {};
-    this.audioRecorder = new AudioRecorder();
+    this.audioRecorder = new AudioRecorder(this);
     this.transcriber = new Transcriber(this.audioRecorder);
     transcriberHolder.add(this.transcriber);
 }

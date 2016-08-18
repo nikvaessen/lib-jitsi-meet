@@ -22,7 +22,7 @@ var TrackRecorder = function(track){
     this.data = null;
     //the name of the person of the JitsiTrack. This can be undefined and/or
     //not unique
-    this.name = updateJitsiTrackName(this);
+    this.name = null;
     //the time of the start of the recording
     this.startTime = null;
 };
@@ -39,7 +39,6 @@ function startRecorder(trackRecorder) {
     }
     trackRecorder.recorder.start();
     trackRecorder.startTime = new Date();
-    updateJitsiTrackName(trackRecorder);
 }
 
 /**
@@ -53,32 +52,6 @@ function stopRecorder(trackRecorder){
             "TrackRecorder object");
     }
     trackRecorder.recorder.stop();
-    updateJitsiTrackName(trackRecorder);
-}
-
-/**
- * Tries to update the name value of a TrackRecorder. If it hasn't changed,
- * it will keep the exiting name. If it changes to a undefined value, the old
- * value will also be kept
- * @param trackRecorder the TrackRecorder object to update the name on
- */
-function updateJitsiTrackName(trackRecorder){
-    if(trackRecorder.track === undefined) {
-        throw new Error("Passed an object to updateJitsiTrackName which is " +
-            "not a TrackRecorder object");
-    }
-    else if(trackRecorder.track.isLocal()) {
-        trackRecorder.name = "local";
-    }
-    else{
-        var id = trackRecorder.track.getParticipantId();
-        //non-good method via APP
-        var newName = APP.conference._room.getParticipantById(id).
-        getDisplayName();
-        if(newName !== 'undefined') {
-            trackRecorder.name = newName;
-        }
-    }
 }
 
 /**
@@ -130,17 +103,22 @@ function determineCorrectFileType() {
 /**
  * main exported object of the file, holding all
  * relevant functions and variables for the outside world
+ * @param jitsiConference the jitsiConference which this object
+ * is going to record
  */
-var audioRecorder = function(){
+var audioRecorder = function(jitsiConference){
     // array of TrackRecorders, where each trackRecorder
     // holds the JitsiTrack, MediaRecorder and recorder data
     this.recorders = [];
-    
+
     //get which file type is supported by the current browser
     this.fileType = determineCorrectFileType();
 
     //boolean flag for active recording
     this.isRecording = false;
+
+    //the jitsiconference the object is recording
+    this.jitsiConference = jitsiConference;
 };
 
 /**
@@ -159,6 +137,8 @@ audioRecorder.prototype.addTrack = function (track) {
         var trackRecorder = instantiateTrackRecorder(track);
         //push it to the local array of all recorders
         this.recorders.push(trackRecorder);
+        //update the name of the trackRecorders
+        this.updateNames();
         //if we're already recording, immediately start recording this new track
         if(this.isRecording){
             startRecorder(trackRecorder);
@@ -191,6 +171,27 @@ audioRecorder.prototype.removeTrack = function(jitsiTrack){
             }
         }
     }
+
+    //make sure the names are up to date
+    this.updateNames();
+};
+
+/**
+ * Tries to update the name value of all TrackRecorder in the array.
+ * If it hasn't changed,it will keep the exiting name. If it changes to a
+ * undefined value, the old value will also be kept.
+ */
+audioRecorder.prototype.updateNames = function(){
+    var conference = this.jitsiConference;
+    this.recorders.forEach(function(trackRecorder){
+        var id = trackRecorder.track.getParticipantId();
+        var participant = conference.getParticipantById(id);
+        //non-good method via APP
+        var newName = participant.getDisplayName();
+        if(newName !== 'undefined') {
+            trackRecorder.name = newName;
+        }
+    });
 };
 
 /**
@@ -253,6 +254,9 @@ audioRecorder.prototype.getRecordingResults = function () {
         throw new Error("cannot get blobs because the AudioRecorder is still" +
             "recording!");
     }
+    //make sure the names are up to date before sending them off
+    this.updateNames();
+
     var array = [];
     var t = this;
     this.recorders.forEach(function (recorder) {
