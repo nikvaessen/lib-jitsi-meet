@@ -184,12 +184,17 @@ audioRecorder.prototype.removeTrack = function(jitsiTrack){
 audioRecorder.prototype.updateNames = function(){
     var conference = this.jitsiConference;
     this.recorders.forEach(function(trackRecorder){
-        var id = trackRecorder.track.getParticipantId();
-        var participant = conference.getParticipantById(id);
-        //non-good method via APP
-        var newName = participant.getDisplayName();
-        if(newName !== 'undefined') {
-            trackRecorder.name = newName;
+        if(trackRecorder.track.isLocal()){
+            trackRecorder.name = "the transcriber";
+        }
+        else {
+            var id = trackRecorder.track.getParticipantId();
+            var participant = conference.getParticipantById(id);
+            //non-good method via APP
+            var newName = participant.getDisplayName();
+            if(newName !== 'undefined') {
+                trackRecorder.name = newName;
+            }
         }
     });
 };
