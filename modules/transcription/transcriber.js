@@ -123,7 +123,7 @@ var blobCallBack = function(transcriber, answer){
     //then store the array and decrease the counter
     transcriber.results.push(answer.wordArray);
     transcriber.counter--;
-    console.log("current counter: " + this.counter);
+    console.log("current counter: " + transcriber.counter);
     //and check if all results have been received.
     transcriber.maybeMerge();
 };
