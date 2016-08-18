@@ -76,7 +76,7 @@ transcriber.prototype.stop = function stop(callback) {
     //and send all recorded audio the the transcription service
     var t = this;
     this.audioRecorder.getRecordingResults().forEach(function(recordingResult){
-        t.transcriptionService.send(recordingResult, t.blobCallBack);
+        t.transcriptionService.send(recordingResult, blobCallBack);
         t.counter++;
     });
     //set the state to "transcribing" so that maybeMerge() functions correctly
@@ -90,10 +90,11 @@ transcriber.prototype.stop = function stop(callback) {
  * offset and adds is to every Word object. It will also start the merging
  * when every send request has been received
  *
+ * @param {transcriber} transcriber The transcriber to add the Array<Word> to
  * @param {RecordingResult} answer a RecordingResult object with a defined
  * WordArray
  */
-transcriber.prototype.blobCallBack = function(answer){
+var blobCallBack = function(transcriber, answer){
     console.log("retrieved an answer from the transcription service. The" +
         " answer has an array of length: " + answer.wordArray.length);
     //first add the offset between the start of the transcription and
@@ -120,11 +121,11 @@ transcriber.prototype.blobCallBack = function(answer){
         answer.wordArray.name = answer.name;
     }
     //then store the array and decrease the counter
-    this.results.push(answer.wordArray);
-    this.counter--;
-    console.log("current counter: " + transcriber.counter);
+    transcriber.results.push(answer.wordArray);
+    transcriber.counter--;
+    console.log("current counter: " + this.counter);
     //and check if all results have been received.
-    this.maybeMerge();
+    transcriber.maybeMerge();
 };
 
 /**
