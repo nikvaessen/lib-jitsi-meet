@@ -18,6 +18,7 @@ var GlobalOnErrorHandler = require("./modules/util/GlobalOnErrorHandler");
 var JitsiConferenceEventManager = require("./JitsiConferenceEventManager");
 var Transcriber = require("./modules/transcription/transcriber");
 var AudioRecorder = require("./modules/transcription/audioRecorder");
+var transcriberHolder = require("./modules/transcription/transcriberHolder");
 
 /**
  * Creates a JitsiConference object with the given name and properties.
@@ -60,6 +61,7 @@ function JitsiConference(options) {
     this.reportedAudioSSRCs = {};
     this.audioRecorder = new AudioRecorder();
     this.transcriber = new Transcriber(this.audioRecorder);
+    transcriberHolder.add(this.transcriber);
 }
 
 /**
@@ -399,6 +401,11 @@ JitsiConference.prototype.addTrack = function (track) {
         }
     }
 
+    //add local track to Transcriber
+    if(track.isAudioTrack()){
+        this.audioRecorder.addTrack(track);
+    }
+
     track.ssrcHandler = function (conference, ssrcMap) {
         if(ssrcMap[this.getMSID()]){
             this._setSSRC(ssrcMap[this.getMSID()]);
@@ -506,6 +513,7 @@ JitsiConference.prototype.onTrackRemoved = function (track) {
         track.audioLevelHandler);
     this.room.removeListener(XMPPEvents.SENDRECV_STREAMS_CHANGED,
         track.ssrcHandler);
+
 
     // send event for stopping screen sharing
     // FIXME: we assume we have only one screen sharing track
@@ -750,6 +758,9 @@ JitsiConference.prototype.onTrackAdded = function (track) {
 
     // Add track to JitsiParticipant.
     participant._tracks.push(track);
+
+    // Add track to the AudioRecorder
+    this.audioRecorder.addTrack(track);
 
     var emitter = this.eventEmitter;
     track.addEventListener(
