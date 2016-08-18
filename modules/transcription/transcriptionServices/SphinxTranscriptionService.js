@@ -2,6 +2,7 @@
 
 var TranscriptionService = require("./AbstractTranscriptionService");
 var Word = require( "../word");
+var audioRecorder = require("./../audioRecorder");
 
 /**
  * Implements a TranscriptionService for a Sphinx4 http server
@@ -25,7 +26,7 @@ SphinxService.constructor = SphinxService;
  * Overrides the sendRequest method from AbstractTranscriptionService
  * it will send the audio stream the a Sphinx4 server to get the transcription
  *
- * @param byteArray the recorder audio stream an an array of bytes
+ * @param audioFileBlob the recorder audio stream an a single Blob
  * @param callback the callback function retrieving the server response
  */
 SphinxService.prototype.sendRequest = function(audioFileBlob, callback) {
@@ -45,7 +46,7 @@ SphinxService.prototype.sendRequest = function(audioFileBlob, callback) {
     };
     request.open("POST", this.url);
     request.setRequestHeader("Content-Type",
-        APP.transcriber.getAudioRecorder().getFileType());
+        audioRecorder.determineCorrectFileType());
     request.send(audioFileBlob);
     console.log("send " + audioFileBlob);
 };

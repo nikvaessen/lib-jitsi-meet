@@ -135,13 +135,18 @@ var audioRecorder = function(){
     // array of TrackRecorders, where each trackRecorder
     // holds the JitsiTrack, MediaRecorder and recorder data
     this.recorders = [];
-
+    
     //get which file type is supported by the current browser
     this.fileType = determineCorrectFileType();
 
     //boolean flag for active recording
     this.isRecording = false;
 };
+
+/**
+ * Add the the exported module so that it can be accessed by other files
+ */
+audioRecorder.determineCorrectFileType = determineCorrectFileType;
 
 /**
  * Adds a new TrackRecorder object to the array.
