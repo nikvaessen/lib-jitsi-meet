@@ -131,16 +131,16 @@ function determineCorrectFileType() {
  * main exported object of the file, holding all
  * relevant functions and variables for the outside world
  */
-var audioRecorder = {
+var audioRecorder = function(){
     // array of TrackRecorders, where each trackRecorder
     // holds the JitsiTrack, MediaRecorder and recorder data
-    recorders: [],
+    this.recorders = [];
 
     //get which file type is supported by the current browser
-    fileType: determineCorrectFileType(),
+    this.fileType = determineCorrectFileType();
 
     //boolean flag for active recording
-    isRecording: false
+    this.isRecording = false;
 };
 
 /**
@@ -148,14 +148,14 @@ var audioRecorder = {
  *
  * @param track the track potentially holding an audio stream
  */
-audioRecorder.addTrack = function (track) {
+audioRecorder.prototype.addTrack = function (track) {
     if(track.isAudioTrack()) {
         //create the track recorder
         var trackRecorder = instantiateTrackRecorder(track);
         //push it to the local array of all recorders
-        audioRecorder.recorders.push(trackRecorder);
+        this.recorders.push(trackRecorder);
         //if we're already recording, immediately start recording this new track
-        if(audioRecorder.isRecording){
+        if(this.isRecording){
             startRecorder(trackRecorder);
         }
     }
@@ -171,13 +171,13 @@ audioRecorder.addTrack = function (track) {
  *
  * @param jitsiTrack the JitsiTrack to remove from the recording session
  */
-audioRecorder.removeTrack = function(jitsiTrack){
-    var array = audioRecorder.recorders;
+audioRecorder.prototype.removeTrack = function(jitsiTrack){
+    var array = this.recorders;
     var i;
     for(i = 0; i < array.length; i++) {
         if(array[i].track.getParticipantId() === jitsiTrack.getParticipantId()){
             var recorderToRemove = array[i];
-            if(audioRecorder.isRecording){
+            if(this.isRecording){
                 stopRecorder(recorderToRemove);
             }
             else {
@@ -191,30 +191,30 @@ audioRecorder.removeTrack = function(jitsiTrack){
 /**
  * Starts the audio recording of every local and remote track
  */
-audioRecorder.start = function () {
-    if(audioRecorder.isRecording) {
+audioRecorder.prototype.start = function () {
+    if(this.isRecording) {
         throw new Error("audiorecorder is already recording");
     }
     // set boolean isRecording flag to true so if new participants join the
     // conference, that track can instantly start recording as well
-    audioRecorder.isRecording = true;
+    this.isRecording = true;
     //start all the mediaRecorders
-    audioRecorder.recorders.forEach(function(trackRecorder){
+    this.recorders.forEach(function(trackRecorder){
         startRecorder(trackRecorder);
     });
     //log that recording has started
     console.log("Started the recording of the audio. There are currently " +
-        audioRecorder.recorders.length + " recorders active.");
+        this.recorders.length + " recorders active.");
 };
 
 /**
  * Stops the audio recording of every local and remote track
  */
-audioRecorder.stop = function() {
+audioRecorder.prototype.stop = function() {
     //set the boolean flag to false
-    audioRecorder.isRecording = false;
+    this.isRecording = false;
     //stop all recorders
-    audioRecorder.recorders.forEach(function(trackRecorder){
+    this.recorders.forEach(function(trackRecorder){
        stopRecorder(trackRecorder);
     });
     console.log("stopped recording");
@@ -223,15 +223,16 @@ audioRecorder.stop = function() {
 /**
  * link hacking to download all recorded audio streams
  */
-audioRecorder.download = function () {
-    audioRecorder.recorders.forEach(function (trackRecorder) {
-        var blob = new Blob(trackRecorder.data, {type: audioRecorder.fileType});
+audioRecorder.prototype.download = function () {
+    var t = this;
+    this.recorders.forEach(function (trackRecorder) {
+        var blob = new Blob(trackRecorder.data, {type: t.fileType});
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         document.body.appendChild(a);
         a.style = "display: none";
         a.href = url;
-        a.download = 'test.' + audioRecorder.fileType.split("/")[1];
+        a.download = 'test.' + t.fileType.split("/")[1];
         a.click();
         window.URL.revokeObjectURL(url);
     });
@@ -242,16 +243,17 @@ audioRecorder.download = function () {
  * which include the name of the owner of the track and the starting time stamp
  * @returns {Array} an array of RecordingResult objects
  */
-audioRecorder.getRecordingResults = function () {
-    if(audioRecorder.isRecording) {
+audioRecorder.prototype.getRecordingResults = function () {
+    if(this.isRecording) {
         throw new Error("cannot get blobs because the AudioRecorder is still" +
             "recording!");
     }
     var array = [];
-    audioRecorder.recorders.forEach(function (recorder) {
+    var t = this;
+    this.recorders.forEach(function (recorder) {
         array.push(
             new RecordingResult(
-            new Blob(recorder.data, {type: audioRecorder.fileType}),
+            new Blob(recorder.data, {type: t.fileType}),
             recorder.name,
             recorder.startTime)
         );
@@ -263,7 +265,7 @@ audioRecorder.getRecordingResults = function () {
  * Gets the mime type of the recorder audio
  * @returns {String} the mime type of the recorder audio
  */
-audioRecorder.getFileType = function () {
+audioRecorder.prototype.getFileType = function () {
     return this.fileType;
 };
 

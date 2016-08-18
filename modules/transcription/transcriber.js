@@ -74,10 +74,11 @@ transcriber.prototype.stop = function stop(callback) {
     console.log("stopping recording and sending audio files");
     this.audioRecorder.stop();
     //and send all recorded audio the the transcription service
-    this.audioRecorder.getRecordingResults().forEach((function(recordingResult){
-        this.transcriptionService.send(recordingResult, this.blobCallBack);
-        this.counter++;
-    }).apply(this));
+    var t = this;
+    this.audioRecorder.getRecordingResults().forEach(function(recordingResult){
+        t.transcriptionService.send(recordingResult, t.blobCallBack);
+        t.counter++;
+    });
     //set the state to "transcribing" so that maybeMerge() functions correctly
     this.state = TRANSCRIBING_STATE;
     //and store the callback for later
