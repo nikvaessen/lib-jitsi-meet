@@ -127,7 +127,7 @@ var blobCallBack = function(answer){
     this.counter--;
     console.log("current counter: " + this.counter);
     //and check if all results have been received.
-    transcriber.maybeMerge();
+    this.maybeMerge();
 };
 
 /**
