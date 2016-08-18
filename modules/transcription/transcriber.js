@@ -75,8 +75,9 @@ transcriber.prototype.stop = function stop(callback) {
     this.audioRecorder.stop();
     //and send all recorded audio the the transcription service
     var t = this;
+
     this.audioRecorder.getRecordingResults().forEach(function(recordingResult){
-        t.transcriptionService.send(recordingResult, blobCallBack);
+        t.transcriptionService.send(recordingResult, blobCallBack.bind(this));
         t.counter++;
     });
     //set the state to "transcribing" so that maybeMerge() functions correctly
@@ -90,11 +91,12 @@ transcriber.prototype.stop = function stop(callback) {
  * offset and adds is to every Word object. It will also start the merging
  * when every send request has been received
  *
- * @param {transcriber} transcriber The transcriber to add the Array<Word> to
+ * note: Make sure to bind this as a Transcription object
+ *
  * @param {RecordingResult} answer a RecordingResult object with a defined
  * WordArray
  */
-var blobCallBack = function(transcriber, answer){
+var blobCallBack = function(answer){
     console.log("retrieved an answer from the transcription service. The" +
         " answer has an array of length: " + answer.wordArray.length);
     //first add the offset between the start of the transcription and
@@ -108,7 +110,7 @@ var blobCallBack = function(transcriber, answer){
         }
 
         var array = "[";
-        answer.wordArray.forEach(function (wordObject) {
+        answer.wordArray.forEach(function(wordObject) {
             wordObject.begin += offset;
             wordObject.end += offset;
             array += wordObject.word+",";
@@ -121,9 +123,9 @@ var blobCallBack = function(transcriber, answer){
         answer.wordArray.name = answer.name;
     }
     //then store the array and decrease the counter
-    transcriber.results.push(answer.wordArray);
-    transcriber.counter--;
-    console.log("current counter: " + transcriber.counter);
+    this.results.push(answer.wordArray);
+    this.counter--;
+    console.log("current counter: " + this.counter);
     //and check if all results have been received.
     transcriber.maybeMerge();
 };
